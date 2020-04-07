@@ -10,10 +10,14 @@ public class EpicImage {
 	private String _url;
 	private int _width;
 	private int _height;
+	private int _itemid;
 
-	private EpicImage() {}
+	private EpicImage() {
+
+	}
 
 	public EpicImage(String url, int width, int height) {
+		this();
 		_id = 0;
 		_url = url;
 		_width = width;
@@ -21,7 +25,7 @@ public class EpicImage {
 	}
 
 	public String getUrl() {
-		return _url;
+		return FileCache.instance.getFile("images", String.valueOf(_itemid), _url);
 	}
 
 	public int getWidth() {
@@ -46,6 +50,10 @@ public class EpicImage {
 
 	void setHeight(int height) {
 		_height = height;
+	}
+
+	void setItemId(int id){
+		_itemid = id;
 	}
 
 	public int save(int itemId) {
@@ -76,6 +84,7 @@ public class EpicImage {
 			if (rset.next()) {
 				EpicImage image = new EpicImage();
 				image.setId(imageId);
+				image.setItemId(rset.getInt("item_id"));
 				image.setUrl(rset.getString("url"));
 				image.setWidth(rset.getInt("width"));
 				image.setHeight(rset.getInt("height"));
@@ -91,16 +100,11 @@ public class EpicImage {
 		ArrayList<EpicImage> result = new ArrayList<>();
 		try {
 			Connection connection = DatabaseManager.getInstance().getConnection();
-			PreparedStatement statement = connection.prepareStatement("SELECT * FROM images WHERE item_id = ?");
+			PreparedStatement statement = connection.prepareStatement("SELECT id FROM images WHERE item_id = ?");
 			statement.setInt(1, id);
 			ResultSet rset = statement.executeQuery();
 			while (rset.next()) {
-				EpicImage image = new EpicImage();
-				image.setId(rset.getInt("id"));
-				image.setUrl(rset.getString("url"));
-				image.setWidth(rset.getInt("width"));
-				image.setHeight(rset.getInt("height"));
-				result.add(image);
+				result.add(loadImage(rset.getInt("id")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
