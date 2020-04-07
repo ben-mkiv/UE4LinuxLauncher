@@ -349,14 +349,9 @@ public class MainForm extends JFrame {
 		_logoutButton.addActionListener(actionEvent -> doLogout());
 
 		//todo: test if this works, too
-		//setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent we) {
-				doLogout();
-				System.exit(0);
-			}
-		});
+		
 	}
 
 	private void doLogout() {
