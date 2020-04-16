@@ -128,10 +128,12 @@ public class MarketplaceManager {
 			int start = i * ITEMS_PER_DOWNLOAD;
 			int end = Math.min((i + 1) * ITEMS_PER_DOWNLOAD, _itemsCount);
 			threadPool.execute(() -> downloadOwnedItemsList(start, end, items));
+
+			updateLoadingBar();
 		}
 		threadPool.shutdown();
-		while (!threadPool.isTerminated()) {
-		}
+
+		while (!threadPool.isTerminated()){}
 	}
 
 	private void getDetailedInformation(ConcurrentLinkedQueue<String> items) {
@@ -159,19 +161,19 @@ public class MarketplaceManager {
 			request.assignBearer();
 			if (!request.execute(200)) {
 				System.out.println(request);
-				throw new RuntimeException("Failed to load owned assets. #1");
+				throw new RuntimeException("Failed to load owned asset #1");
 			}
 			updateLoadingBar();
 			JSONObject root = new JSONObject(request.getContent());
 			if (!root.has("status"))
-				throw new RuntimeException("Failed to load owned assets. #2");
+				throw new RuntimeException("Failed to load owned asset #2");
 			if (!root.getString("status").equalsIgnoreCase("ok"))
-				throw new RuntimeException("Failed to load owned assets. #3");
+				throw new RuntimeException("Failed to load owned asset #3");
 			if (!root.has("data"))
-				throw new RuntimeException("Failed to load owned assets. #4");
+				throw new RuntimeException("Failed to load owned asset #4");
 			JSONObject data = root.getJSONObject("data");
 			if (!data.has("data"))
-				throw new RuntimeException("Failed to load owned assets. #4");
+				throw new RuntimeException("Failed to load owned asset #4");
 			JSONObject innerData = data.getJSONObject("data");
 			item = new EpicItem(innerData);
 			item.save();
@@ -179,7 +181,7 @@ public class MarketplaceManager {
 			SessionManager.getInstance().getUser().addOwnedItem(item);
 		}
 		catch (IOException exception) {
-			throw new RuntimeException("Failed to load owned assets. #7");
+			throw new RuntimeException("Failed to load owned asset #7");
 		}
 	}
 
@@ -196,7 +198,6 @@ public class MarketplaceManager {
 				throw new RuntimeException("Failed to load owned assets. #1");
 			}
 			SessionManager.getInstance().getSession().setCookies(request.getCookies());
-			updateLoadingBar();
 			JSONObject root = new JSONObject(request.getContent());
 			if (!root.has("status"))
 				throw new RuntimeException("Failed to load owned assets. #2");

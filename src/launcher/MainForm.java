@@ -11,6 +11,8 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -85,20 +87,23 @@ public class MainForm extends JFrame {
 	private String _mainLoadingBarText;
 	private String _additionalLoadingBarText;
 
+
+	int itemsInLine = 4;
+
 	MainForm() {
 		super("Main");
 		_caretPosition = 0;
 		_viewingItem = false;
 		_loadingPercent = 0;
 		_currentCategory = null;
-		_itemsPerPage = 8;
+		_itemsPerPage = 1024;
 		_viewType = ViewType.Library;
 		_downloadThread = null;
 		_filter = Filter.All;
 		setContentPane(mainPanel);
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setResizable(false);
+		setResizable(true);
 		pack();
 		_textPane1 = new JTextPane();
 		_textPane1.setEditable(false);
@@ -182,6 +187,19 @@ public class MainForm extends JFrame {
 			_itemsPerPage = 8;
 			updateOwnedAssetsList();
 		});
+
+		class ResizeListener extends ComponentAdapter {
+			public void componentResized(ComponentEvent e) {
+				int newItemsInLine = (int) Math.floor((e.getComponent().getWidth() - 50) / 267); // 50 is just an arbitrary picked number to count in the spacing left/right of the table
+				if(itemsInLine != newItemsInLine) {
+					itemsInLine = newItemsInLine;
+					updateOwnedAssetsList();
+				}
+			}
+		}
+
+		_scrollPane.addComponentListener(new ResizeListener());
+
 
 		//todo this should probably be changed for all tabs to provide the tab name in the URI (like for ownedAssets) so that the parser knows what category invoked the listener
 		_textPane1.addHyperlinkListener(e -> {
@@ -453,7 +471,6 @@ public class MainForm extends JFrame {
 		data.append(_currentCategory.getName());
 		data.append("</span><br></p><br>");
 		if (_currentCategory != null) {
-			int itemsInLine = 4;
 			final int i[] = {0};
 
 			data.append("<table class=\"asset-container\">");
@@ -500,9 +517,6 @@ public class MainForm extends JFrame {
 
 	private void updateOwnedAssetsList() {
 		ArrayList<String> tableElements = new ArrayList<>();
-
-
-		int itemsInLine = 4;
 
 		int i = 0;
 		if (SessionManager.getInstance().getUser().getOwnedItems() != null) {
