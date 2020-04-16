@@ -111,9 +111,11 @@ public class EpicItemMeta {
     }
 
     private String downloadItemManifest(String distribution, String path, String signature) throws EpicItem.EpicItemException {
+        String url = distribution + path + "?" + signature;
+
         try {
             DownloadForm.getInstance().setMainProgressText("Downloading item manifest...");
-            Request request = new Request(distribution + path + "?" + signature);
+            Request request = new Request(url.replaceAll(" ", "%20"));
             if (!request.execute(200)) {
                 System.out.println(request);
                 throw new EpicItem.EpicItemException("Failed to download item manifest...");
@@ -129,8 +131,10 @@ public class EpicItemMeta {
 
 
     private String downloadItemInfo() throws EpicItem.EpicItemException {
+        String url = "https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/public/assets/Windows/" + item.getCatalogItemId() + "/" + unrealVersion;
+
         try {
-            Request request = new Request("https://launcher-public-service-prod06.ol.epicgames.com/launcher/api/public/assets/Windows/" + item.getCatalogItemId() + "/" + unrealVersion);
+            Request request = new Request(url);
             request.assignParameter("label", "Live");
             request.assignCookies(SessionManager.getInstance().getSession());
             request.assignBearer();

@@ -11,12 +11,9 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -100,6 +97,7 @@ public class MainForm extends JFrame {
 		_filter = Filter.All;
 		setContentPane(mainPanel);
 		setVisible(true);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 		pack();
 		_textPane1 = new JTextPane();
@@ -347,11 +345,6 @@ public class MainForm extends JFrame {
 			}).start();
 		});
 		_logoutButton.addActionListener(actionEvent -> doLogout());
-
-		//todo: test if this works, too
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		
 	}
 
 	private void doLogout() {
