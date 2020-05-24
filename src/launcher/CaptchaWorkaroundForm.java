@@ -7,6 +7,12 @@ import javax.swing.*;
 import java.awt.event.*;
 
 public class CaptchaWorkaroundForm extends JFrame {
+
+	private static String bda_input_raw = "";
+	private static String browser_input_raw = "";
+
+	public static int loginTries = 0;
+
 	private JTextPane _unrealEngine4MarketplaceTextPane;
 	private JButton _confirmButton;
 	private JTextPane errorInfo;
@@ -21,6 +27,7 @@ public class CaptchaWorkaroundForm extends JFrame {
 		setVisible(true);
 		setResizable(false);
 		pack();
+
 		_bdaTextArea.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -133,8 +140,10 @@ public class CaptchaWorkaroundForm extends JFrame {
 
 	public void start() {
 		setVisible(true);
-		_bdaTextArea.setText("QmFzZTY0IGNvZGU=");
-		_userBrowserTextArea.setText("Browser:");
+
+		_bdaTextArea.setText(bda_input_raw.length() > 0 ? bda_input_raw : "QmFzZTY0IGNvZGU=");
+		_userBrowserTextArea.setText(browser_input_raw.length() > 0 ? browser_input_raw : "Browser:");
+
 		errorInfo.setText("");
 		_confirmButton.setEnabled(true);
 		_bdaTextArea.setEnabled(true);
@@ -156,9 +165,15 @@ public class CaptchaWorkaroundForm extends JFrame {
 			_confirmButton.setEnabled(false);
 			_bdaTextArea.setEnabled(false);
 			_userBrowserTextArea.setEnabled(false);
+
+			bda_input_raw = _bdaTextArea.getText().trim();
+			browser_input_raw = _userBrowserTextArea.getText().trim();
+
 			setVisible(false);
 			SessionManager.getInstance().getSession().setUserBrowser(_userBrowserTextArea.getText().trim());
 			SessionManager.getInstance().getSession().setBDA(_bdaTextArea.getText().trim());
+
+			loginTries++;
 			AuthenticationManager.getInstance().doLogin();
 		}
 	}

@@ -48,7 +48,7 @@ public class Session {
 		}
 		else
 			decodedJSON = bda;
-		_bda = new JSONArray(decodedJSON);
+		_bda = new JSONArray("["+decodedJSON+"]");
 		for (int i = 0; i < _bda.length(); i++) {
 			JSONObject obj = _bda.optJSONObject(i);
 			if (obj == null)

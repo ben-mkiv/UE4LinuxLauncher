@@ -1,9 +1,6 @@
 package launcher.managers;
 
-import launcher.CaptchaWorkaroundForm;
-import launcher.LoginForm;
-import launcher.MainForm;
-import launcher.TwoFactorForm;
+import launcher.*;
 import launcher.objects.Request;
 import launcher.utils.Utils;
 import org.json.JSONObject;
@@ -15,10 +12,11 @@ import java.util.Random;
 public class AuthenticationManager {
 	private static String ARKOSELABS_PUBLIC_KEY = "37D033EB-6489-3763-2AE1-A228C04103F5";
 
-	private static String REPUTATION = "https://www.unrealengine.com/id/api/reputation";
-	private static String CSRF = "https://www.unrealengine.com/id/api/csrf";
+	private static String REPUTATION = "https://www.epicgames.com/id/api/reputation";
+	private static String CSRF = "https://www.epicgames.com/id/api/csrf";
 	private static String CAPTCHA = "https://epic-games-api.arkoselabs.com/fc/gt2/public_key/" + ARKOSELABS_PUBLIC_KEY;
-	private static String LOGIN = "https://www.unrealengine.com/id/api/login";
+	public static String CAPTCHA_URL = "https://funcaptcha.com/fc/api/nojs/?pkey=" + ARKOSELABS_PUBLIC_KEY;
+	private static String LOGIN = "https://www.epicgames.com/id/api/login";
 	private static String EXCHANGE = "https://www.epicgames.com/id/api/exchange";
 
 	private static String OAUTH_TOKEN = "https://account-public-service-prod03.ol.epicgames.com/account/api/oauth/token";
@@ -28,6 +26,8 @@ public class AuthenticationManager {
 	private static String CODE = "MzRhMDJjZjhmNDQxNGUyOWIxNTkyMTg3NmRhMzZmOWE6ZGFhZmJjY2M3Mzc3NDUwMzlkZmZlNTNkOTRmYzc2Y2Y=";
 
 	private String TOKEN = "";
+
+	public static String FUNCAPTCHA_TOKEN = "";
 
 	private int _stepsCount;
 	private int _currentStep;
@@ -171,8 +171,8 @@ public class AuthenticationManager {
 			request.assignHeader("X-Epic-Event-Category", "login");
 			request.assignHeader("X-Epic-Strategy-Flags", "guardianEmailVerifyEnabled=false;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false");
 			request.assignHeader("X-Requested-With", "XMLHttpRequest");
-			request.assignHeader("Referer", "https://www.unrealengine.com/id/login");
-			request.assignHeader("Host", "www.unrealengine.com");
+			request.assignHeader("Referer", "https://www.epicgames.com/id/login");
+			request.assignHeader("Host", "www.epicgames.com");
 			request.assignHeader("Accept", "application/json, text/plain, */*");
 			if (!request.execute(204)) {
 				throw new RuntimeException("Error: #1006");
@@ -196,10 +196,10 @@ public class AuthenticationManager {
 			request.assignHeader("X-Epic-Event-Category", "login");
 			request.assignHeader("X-Epic-Strategy-Flags", "guardianEmailVerifyEnabled=false;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false");
 			request.assignHeader("X-Requested-With", "XMLHttpRequest");
-			request.assignHeader("Referer", "https://www.unrealengine.com/id/login");
-			request.assignHeader("Host", "www.unrealengine.com");
+			request.assignHeader("Referer", "https://www.epicgames.com/id/login");
+			request.assignHeader("Host", "www.epicgames.com");
 			request.assignHeader("Accept", "application/json, text/plain, */*");
-			request.assignInput("email", SessionManager.getInstance().getUser().getEmail()).assignInput("password", SessionManager.getInstance().getUser().getPassword()).assignInput("rememberMe", false).assignInput("captcha", TOKEN);
+			request.assignInput("email", SessionManager.getInstance().getUser().getEmail()).assignInput("password", SessionManager.getInstance().getUser().getPassword()).assignInput("rememberMe", true).assignInput("captcha", FUNCAPTCHA_TOKEN);
 			request.postRequest().jsonContentType();
 			if (!request.execute(200)) {
 				if (request.getResponseCode() == 431) {
@@ -213,8 +213,13 @@ public class AuthenticationManager {
 						if (object.has("errorCode")) {
 							String errorCode = object.getString("errorCode");
 							if (errorCode.equals("errors.com.epicgames.accountportal.captcha_invalid")) {
-								CaptchaWorkaroundForm.getInstance().start();
-								throw new RuntimeException("Captcha data necessary to finish authentication.");
+								//CaptchaWorkaroundForm.getInstance().start();
+								CaptchaForm.getInstance().start();
+
+								if(CaptchaWorkaroundForm.loginTries > 3)
+									throw new RuntimeException("Captcha data necessary to finish authentication.\nTry to logout from Marketplace in your Browser and restart the UE4Launcher App! (if it still fails login again to marketplace in your browser and use the new BDA)");
+								else
+									throw new RuntimeException("Captcha data necessary to finish authentication.");
 							}
 						}
 						throw new RuntimeException(object.getString("message"));
@@ -342,15 +347,15 @@ public class AuthenticationManager {
 	private void finishLogin() {
 		String sid = "";
 		try {
-			Request request = new Request("https://www.unrealengine.com/id/api/redirect?redirectUrl=https%3A%2F%2Fwww.unrealengine.com%2Fen-US%2F&clientId=932e595bedb643d9ba56d3e1089a5c4b");
+			Request request = new Request("https://www.epicgames.com/id/api/redirect?redirectUrl=https%3A%2F%2Fwww.epicgames.com%2Fen-US%2F&clientId=932e595bedb643d9ba56d3e1089a5c4b");
 			request.assignCookies(SessionManager.getInstance().getSession());
 			request.assignXSRF(SessionManager.getInstance().getSession().getXSRF());
 			request.assignHeader("X-Epic-Event-Action", "login");
 			request.assignHeader("X-Epic-Event-Category", "login");
 			request.assignHeader("X-Epic-Strategy-Flags", "guardianEmailVerifyEnabled=false;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false");
 			request.assignHeader("X-Requested-With", "XMLHttpRequest");
-			request.assignHeader("Referer", "https://www.unrealengine.com/id/login");
-			request.assignHeader("Host", "www.unrealengine.com");
+			request.assignHeader("Referer", "https://www.epicgames.com/id/login");
+			request.assignHeader("Host", "www.epicgames.com");
 			request.assignHeader("Accept", "application/json, text/plain, */*");
 			if (!request.execute(200)) {
 				throw new RuntimeException("Error: #1024");
@@ -366,15 +371,15 @@ public class AuthenticationManager {
 		}
 		successfullStep();
 		try {
-			Request request = new Request("https://www.epicgames.com/id/api/set-sid?sid=" + sid);
+			Request request = new Request("https://www.unrealengine.com/id/api/set-sid?sid=" + sid);
 			request.assignCookies(SessionManager.getInstance().getSession());
 			request.assignXSRF(SessionManager.getInstance().getSession().getXSRF());
 			request.assignHeader("X-Epic-Event-Action", "login");
 			request.assignHeader("X-Epic-Event-Category", "login");
 			request.assignHeader("X-Epic-Strategy-Flags", "guardianEmailVerifyEnabled=false;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false");
 			request.assignHeader("X-Requested-With", "XMLHttpRequest");
-			request.assignHeader("Referer", "https://www.unrealengine.com/id/login");
-			request.assignHeader("Host", "www.unrealengine.com");
+			request.assignHeader("Referer", "https://www.epicgames.com/id/login");
+			request.assignHeader("Host", "www.epicgames.com");
 			request.assignHeader("Accept", "application/json, text/plain, */*");
 			if (!request.execute(204)) {
 				throw new RuntimeException("Error: #1027");
@@ -393,7 +398,7 @@ public class AuthenticationManager {
 			request.assignHeader("X-Epic-Strategy-Flags", "guardianEmailVerifyEnabled=false;guardianEmbeddedDocusignEnabled=true;guardianKwsFlowEnabled=false;minorPreRegisterEnabled=false;registerEmailPreVerifyEnabled=false");
 			request.assignHeader("X-Requested-With", "XMLHttpRequest");
 			request.assignHeader("Referer", "https://www.unrealengine.com/id/login");
-			request.assignHeader("Host", "www.unrealengine.com");
+			request.assignHeader("Host", "www.epicgames.com");
 			request.assignHeader("Accept", "application/json, text/plain, */*");
 			if (!request.execute(200)) {
 				throw new RuntimeException("Error: #1029");
@@ -435,7 +440,7 @@ public class AuthenticationManager {
 		retrieveCSRF();
 
 		try {
-			Request request = new Request("https://www.unrealengine.com/id/api/login/mfa");
+			Request request = new Request("https://www.epicgames.com/id/api/login/mfa");
 			request.assignCookies(SessionManager.getInstance().getSession());
 			request.assignXSRF(SessionManager.getInstance().getSession().getXSRF());
 			request.assignHeader("X-Epic-Event-Action", "mfa");

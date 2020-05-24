@@ -97,7 +97,7 @@ public class TwoFactorForm extends JFrame {
 			_confirmButton.setEnabled(false);
 			_securityCodeTextField.setEnabled(false);
 			setVisible(false);
-			AuthenticationManager.getInstance().confirmTwoFactorAuth(_securityCodeTextField.getText());
+			AuthenticationManager.getInstance().confirmTwoFactorAuth(_securityCodeTextField.getText().trim());
 		}
 	}
 
