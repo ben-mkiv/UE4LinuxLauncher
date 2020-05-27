@@ -30,44 +30,8 @@ public class AssetListFormOwned extends AssetListForm {
                 return;
             reloadList();
         });
-
-
-
-
     }
 
-    private boolean shouldDisplay(EpicItem item){
-        boolean downloaded = item.getLastDownloadTime(SessionManager.getInstance().getUser().getCurrentProject()) != -1;
-
-        switch(ownedAssetsFilter){
-            case DOWNLOADED:
-                if(!downloaded)
-                    return false;
-                break;
-            case NOTDOWNLOADED:
-                if(downloaded)
-                    return false;
-                break;
-        }
-
-        if(filterByVendor.length() > 0 && !item.getSellerName().equals(filterByVendor))
-            return false;
-
-        if(filterByCategory.length() > 0) {
-            boolean found = false;
-            for(EpicCategory cat : item.getCategories())
-                if(cat.getName().equals(filterByCategory))
-                    found = true;
-
-            if(!found)
-                return false;
-        }
-
-        if(filterByText.length() > 0 && !item.getName().contains(filterByText) && !item.getSellerName().contains(filterByText) && !item.getDescription().contains(filterByText) && !item.getLongDescription().contains(filterByText))
-            return false;
-
-        return true;
-    }
 
     public void reloadList() {
         HashSet<String> vendors = new HashSet<>();

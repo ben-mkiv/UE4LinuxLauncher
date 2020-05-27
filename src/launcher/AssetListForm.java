@@ -450,6 +450,41 @@ abstract public class AssetListForm extends JFrame {
 
 
 
+    boolean shouldDisplay(EpicItem item){
+        boolean downloaded = item.getLastDownloadTime(SessionManager.getInstance().getUser().getCurrentProject()) != -1;
+
+        switch(ownedAssetsFilter){
+            case DOWNLOADED:
+                if(!downloaded)
+                    return false;
+                break;
+            case NOTDOWNLOADED:
+                if(downloaded)
+                    return false;
+                break;
+        }
+
+        if(filterByVendor.length() > 0 && !item.getSellerName().equalsIgnoreCase(filterByVendor))
+            return false;
+
+        if(filterByCategory.length() > 0) {
+            boolean found = false;
+            for(EpicCategory cat : item.getCategories())
+                if(cat.getName().equalsIgnoreCase(filterByCategory))
+                    found = true;
+
+            if(!found)
+                return false;
+        }
+
+        filterByText = filterByText.toLowerCase();
+        if(filterByText.length() > 0 && !item.getName().toLowerCase().contains(filterByText) && !item.getSellerName().toLowerCase().contains(filterByText) && !item.getDescription().toLowerCase().contains(filterByText) && !item.getLongDescription().toLowerCase().contains(filterByText))
+            return false;
+
+        return true;
+    }
+
+
     abstract void reloadList();
 
 
