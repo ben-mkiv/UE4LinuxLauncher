@@ -26,6 +26,8 @@ public class DownloadForm extends JFrame {
 	private String _minorProgressText;
 	private String _mainProgressText;
 
+	private AssetListForm invokedFrom;
+
 	public DownloadForm() {
 		super("Download");
 		_item = null;
@@ -39,7 +41,8 @@ public class DownloadForm extends JFrame {
 		});
 	}
 
-	public void startDownloading(EpicItem item) {
+	public void startDownloading(EpicItem item, AssetListForm invokedFromForm) {
+		invokedFrom = invokedFromForm;
 		_item = item;
 		_progress1 = 0;
 		_progress2 = 0;
@@ -127,7 +130,7 @@ public class DownloadForm extends JFrame {
 			}
 		}
 		setVisible(false);
-		MainForm.getInstance().finishDownload();
+		invokedFrom.finishDownload();
 	}
 
 	private static class SingletonHolder {

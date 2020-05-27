@@ -23,6 +23,7 @@ public class CaptchaForm extends JFrame {
     public void storeToken(){
         AuthenticationManager.FUNCAPTCHA_TOKEN = textField2.getText().trim();
         setVisible(false);
+        LoginForm.getInstance().loginError("");
         AuthenticationManager.getInstance().doLogin();
     }
 

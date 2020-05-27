@@ -1,5 +1,6 @@
 package launcher.managers;
 
+import launcher.LibraryForm;
 import launcher.MainForm;
 import launcher.objects.User;
 import org.json.JSONObject;
@@ -112,7 +113,7 @@ public class EngineManager {
 					user.getProjects().put(projectName, projectPath);
 				}
 			}
-			MainForm.getInstance().updateProjectsList();
+			LibraryForm.getInstance().updateProjectsList();
 		}
 		catch (Exception e) {
 			return false;
