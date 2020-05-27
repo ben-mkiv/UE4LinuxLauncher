@@ -28,8 +28,10 @@ public class DownloadForm extends JFrame {
 
 	private AssetListForm invokedFrom;
 
+	enum DownloadStates { DOWNLOAD_METADATA, DOWNLOAD_CHUNKS, DECOMPRESS_CHUNKS, EXTRACT_FILES }
+
 	public DownloadForm() {
-		super("UE4LinuxLauncher - Download");
+		super("UE4Download");
 		_item = null;
 		setContentPane(_panel1);
 		setVisible(false);
@@ -81,6 +83,7 @@ public class DownloadForm extends JFrame {
 		_progress2 += progress;
 		_progressBar2.setValue((int) _progress2);
 		_progressBar2.setString(_mainProgressText + " [" + String.format("%.2f", _progress2) + "%]");
+		setTitle("UE4Download (" + Math.round(_progress2) + "%)");
 	}
 
 	public synchronized void setMainInfoText(String text) {
@@ -117,10 +120,9 @@ public class DownloadForm extends JFrame {
 				statement.setInt(4, (int) (System.currentTimeMillis()/1000));
 				statement.executeUpdate();
 			} catch(Exception SQLException){
-				System.out.println("failed to connect to database, download information will not be stored and so not be shown as already downloaded");
+				System.out.println("failed to connect to database, download information will not be stored and so not be shown as downloaded item");
 			}
 		}
-
 
 		if (openFolder) {
 			try {

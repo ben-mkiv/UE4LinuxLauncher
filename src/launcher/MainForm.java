@@ -34,7 +34,6 @@ public class MainForm extends JFrame {
 	private JButton ownedAssetsButton;
 	private JProgressBar _loadingProgressBar;
 	private double _loadingPercent = 0;
-	private JLabel _loadingLabel;
 	private JButton _logoutButton;
 	private JLabel _engineVersion;
 
@@ -202,7 +201,6 @@ public class MainForm extends JFrame {
 		Thread t1 = new Thread(() -> {
 			try {
 				Thread.sleep(2000);
-				_loadingLabel.setVisible(false);
 				_loadingProgressBar.setVisible(false);
 			} catch (InterruptedException e) {
 				// handle: log or throw in a wrapped RuntimeException
@@ -210,14 +208,6 @@ public class MainForm extends JFrame {
 			}
 		});
 		t1.start();
-	}
-
-	public void disableActions() {
-		lockUI(true);
-	}
-
-	public void enableActions() {
-		lockUI(false);
 	}
 
 	public void lockUI(boolean setLocked){
@@ -257,12 +247,12 @@ public class MainForm extends JFrame {
 	public void initialize() {
 		LibraryForm.getInstance().setEngineInstallDir(SessionManager.getInstance().getUser().getUe4InstallLocation());
 
-		disableActions();
+		lockUI(true);
 		EngineManager.getInstance().readEngineData();
 		MarketplaceManager.getInstance().createMarketplace();
 //		SessionManager.getInstance().getUser().loadOwnedAssets();
 		hideLoading();
-		enableActions();
+		lockUI(false);
 	}
 
 	private static MainForm _instance = null;

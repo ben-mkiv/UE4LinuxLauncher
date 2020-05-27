@@ -415,7 +415,7 @@ abstract public class AssetListForm extends JFrame {
 
     private void startDownload(String catalogItemId) {
         if (SessionManager.getInstance().getUser().getCurrentProject() == null || SessionManager.getInstance().getUser().getCurrentProject().length() < 1) {
-            JOptionPane.showMessageDialog(this, "You have to select project in library!", "No selected project!", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "You have to select a project from the dropdown on top of the main window!", "No selected project!", JOptionPane.ERROR_MESSAGE);
             return;
         }
         EpicItem item = MarketplaceManager.getInstance().getItem(catalogItemId);
