@@ -20,7 +20,7 @@ public class LoginForm extends JFrame {
 	private boolean _changePassword = false;
 
 	public LoginForm() {
-		super("Login");
+		super("UE4LinuxLauncher - Login");
 		setContentPane(loginPanel);
 		setVisible(true);
 		setResizable(false);

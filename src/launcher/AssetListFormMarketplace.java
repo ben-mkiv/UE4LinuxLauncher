@@ -4,6 +4,7 @@ package launcher;
 import launcher.objects.HtmlUtils;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -11,6 +12,8 @@ public class AssetListFormMarketplace extends AssetListForm {
 
     public AssetListFormMarketplace(){
         super();
+
+        _AssetListForm.setBorder(new TitledBorder("Marketplace"));
 
         _scrollPane.getVerticalScrollBar().addAdjustmentListener(event -> {
             if (_viewingItem || _currentCategory == null)

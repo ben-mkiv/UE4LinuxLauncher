@@ -5,7 +5,8 @@ import launcher.managers.MarketplaceManager;
 import launcher.managers.SessionManager;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.*;
 
@@ -38,9 +39,9 @@ public class MainForm extends JFrame {
 	private JLabel _engineVersion;
 
 	private ViewType _viewType = ViewType.SplashScreen;
-	private JLabel _selectedProject;
 	private JButton _launchUE4Button;
 	private JButton _reloadOwnedAssetsButton;
+	public JComboBox<String> _projectsList;
 
 
 	private String _mainLoadingBarText;
@@ -49,7 +50,7 @@ public class MainForm extends JFrame {
 
 
 	MainForm() {
-		super("Main");
+		super("UE4LinuxLauncher");
 
 		setContentPane(mainPanel);
 		setVisible(true);
@@ -108,34 +109,44 @@ public class MainForm extends JFrame {
 		_logoutButton.addActionListener(actionEvent -> doLogout());
 
 
+		_projectsList.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent var1) {
+				if(_projectsList.getSelectedItem() instanceof String) {
+					String value = (String) _projectsList.getSelectedItem();
+
+					if(value.length() > 0 && !value.equals("please select a project")) {
+						SessionManager.getInstance().getUser().setCurrentProject(value);
+					}
+				}
+			}
+		});
+
 		marketplaceButton.setEnabled(false);
 
 		showLibrary();
 	}
 
-	private void loadFormToMainPanel(JPanel panel){
-		_mainPanel = panel;
-
-
-		_mainPanel.revalidate();
-
+	private void loadFormToMainPanel(JFrame panel){
+		_mainPanel.removeAll();
+		_mainPanel.setLayout(panel.getLayout());
+		_mainPanel.add(panel.getContentPane());
 
 		revalidate();
-		pack();
 
 		lockUI(false);
 	}
 
 	private void showLibrary(){
 		lockUI(true);
-		loadFormToMainPanel(LibraryForm.getInstance());
 		_viewType = ViewType.Library;
+		loadFormToMainPanel(LibraryForm.getInstance());
 	}
 
 	private void showOwnedAssets(){
 		lockUI(true);
-		loadFormToMainPanel(OwnedAssetsList);
 		_viewType = ViewType.OwnedAssets;
+		loadFormToMainPanel(OwnedAssetsList);
 
 		OwnedAssetsList.reloadList();
 	}
@@ -164,9 +175,6 @@ public class MainForm extends JFrame {
 
 		// Todo: add marketplace form and move all this over there with its own list...
 		//list1.setListData(data);
-	}
-
-	public void setMainLoadingText(String text) {
 	}
 
 	public void setLoadingText(String text) {
@@ -269,10 +277,6 @@ public class MainForm extends JFrame {
 		if (reinitialize || _instance == null)
 			_instance = new MainForm();
 		return _instance;
-	}
-
-	public void setProject(String projectName){
-		_selectedProject.setText(projectName);
 	}
 
 	private void launchUE4() {

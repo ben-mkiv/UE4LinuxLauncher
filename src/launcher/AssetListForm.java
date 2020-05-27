@@ -12,16 +12,13 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 
-abstract public class AssetListForm extends JPanel {
+abstract public class AssetListForm extends JFrame {
     enum Filter {
         All(Double.MAX_VALUE),
         Below10(10),
@@ -40,11 +37,11 @@ abstract public class AssetListForm extends JPanel {
         }
     }
 
-    JPanel mainPanel;
+    JPanel _AssetListForm;
     JPanel _assetsControls;
-    JComboBox _filterDownloaded;
-    JComboBox _filterVendor;
-    JComboBox _filterCategory;
+    JComboBox<String> _filterDownloaded;
+    JComboBox<String> _filterVendor;
+    JComboBox<String> _filterCategory;
     JTextField _filterText;
     JScrollPane _scrollPane;
 
@@ -69,12 +66,56 @@ abstract public class AssetListForm extends JPanel {
 
     enum OwnedAssetsFilter { ALL, DOWNLOADED, NOTDOWNLOADED };
 
+    String filterByVendor = "", filterByText = "", filterByCategory = "";
+
 
     OwnedAssetsFilter ownedAssetsFilter = OwnedAssetsFilter.ALL;
 
 
+    void setVendors(Set<String> vendorList){
+        ArrayList<String> sortedList = new ArrayList<>(vendorList);
+        Collections.sort(sortedList);
+
+        ArrayList<String> options = new ArrayList<>();
+        options.add("show all vendors");
+        options.addAll(sortedList);
+
+        _filterVendor.removeAll();
+
+        for(String element : options) {
+            _filterVendor.addItem(element);
+        }
+
+        // auto select current project
+        if(filterByVendor.length() > 0) {
+            _filterVendor.setSelectedItem(filterByVendor);
+        }
+    }
+
+    void setCategories(Set<String> categoryList){
+        ArrayList<String> sortedList = new ArrayList<>(categoryList);
+        Collections.sort(sortedList);
+
+        ArrayList<String> options = new ArrayList<>();
+        options.add("show all categories");
+        options.addAll(sortedList);
+
+        _filterCategory.removeAll();
+
+        for(String element : options) {
+            _filterCategory.addItem(element);
+        }
+
+        // auto select current project
+        if(filterByCategory.length() > 0) {
+            _filterCategory.setSelectedItem(filterByCategory);
+        }
+    }
+
     public AssetListForm(){
         super();
+
+        setContentPane(_AssetListForm);
 
         _textPane1 = new JTextPane();
         _textPane1.setEditable(false);
@@ -101,6 +142,71 @@ abstract public class AssetListForm extends JPanel {
         _scrollPane.addComponentListener(new ResizeListener());
 
 
+        // initialize drop down boxes
+
+        _filterDownloaded.addItem("show all");
+        _filterDownloaded.addItem("show only downloaded");
+        _filterDownloaded.addItem("show only not downloaded");
+
+        setVendors(new LinkedHashSet<>());
+        setCategories(new LinkedHashSet<>());
+
+
+        // add dropdown event listeners
+
+        _filterDownloaded.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent var1) {
+                if(_filterDownloaded.getSelectedItem() instanceof String) {
+                    switch((String) _filterDownloaded.getSelectedItem()){
+                        case "show all":                 ownedAssetsFilter = OwnedAssetsFilter.ALL; break;
+                        case "show only downloaded":     ownedAssetsFilter = OwnedAssetsFilter.DOWNLOADED; break;
+                        case "show only not downloaded": ownedAssetsFilter = OwnedAssetsFilter.NOTDOWNLOADED; break;
+                    }
+                }
+
+                reloadList();
+            }
+        });
+
+        _filterVendor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent var1) {
+                if(_filterVendor.getSelectedItem() instanceof String) {
+                    filterByVendor = _filterVendor.getSelectedItem().equals("show all vendors") ? "" : (String) _filterVendor.getSelectedItem();
+                }
+
+                reloadList();
+            }
+        });
+
+        _filterCategory.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent var1) {
+                if(_filterCategory.getSelectedItem() instanceof String) {
+                    filterByCategory = _filterCategory.getSelectedItem().equals("show all categories") ? "" : (String) _filterCategory.getSelectedItem();
+                }
+
+                reloadList();
+            }
+        });
+
+        _filterText.addKeyListener(new KeyListener() {
+            @Override
+            public void keyReleased(KeyEvent var1){}
+
+            @Override
+            public void keyPressed(KeyEvent var1){}
+
+            @Override
+            public void keyTyped(KeyEvent var1) {
+                if(filterByText.equals(_filterText.getText()))
+                    return;
+
+                filterByText = _filterText.getText();
+                reloadList();
+            }
+        });
 
         _textPane1.addHyperlinkListener(e -> {
             if (!e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED))
@@ -159,8 +265,6 @@ abstract public class AssetListForm extends JPanel {
                 }
             }
         });
-
-
     }
 
 

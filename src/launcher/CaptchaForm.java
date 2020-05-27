@@ -14,6 +14,7 @@ public class CaptchaForm extends JFrame {
     private JPanel captchaFormUserInput;
 
     public CaptchaForm(){
+        super("UE4LinuxLauncher - Captcha Request");
         setContentPane(captchaForm);
         textField1.setText(AuthenticationManager.CAPTCHA_URL);
         confirmButton.addActionListener(actionEvent -> storeToken());

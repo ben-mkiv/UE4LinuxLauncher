@@ -31,13 +31,11 @@ public class User {
 	private List<EpicItem> _ownedItems;
 	private Map<String, String> _projects;
 
-	private String _currentProject;
+	private String _currentProject = "";
 
 	public User() {
 		_ownedItems = new LinkedList<>();
 		_projects = new HashMap<>();
-		_ue4InstallLocation = "";
-		_currentProject = "";
 	}
 
 	public String getDisplayName() {

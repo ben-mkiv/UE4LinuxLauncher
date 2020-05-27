@@ -14,7 +14,7 @@ public class TwoFactorForm extends JFrame {
 	private JPanel _twoFactorForm;
 
 	public TwoFactorForm() {
-		super("Two Factor Authentification");
+		super("UE4LinuxLauncher - 2FA");
 		setContentPane(_twoFactorForm);
 		setVisible(true);
 		setResizable(false);

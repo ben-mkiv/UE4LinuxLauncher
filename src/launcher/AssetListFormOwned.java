@@ -1,18 +1,22 @@
 package launcher;
 
 import launcher.managers.SessionManager;
+import launcher.objects.EpicCategory;
 import launcher.objects.EpicItem;
 import launcher.objects.HtmlUtils;
-import launcher.utils.Utils;
 
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 public class AssetListFormOwned extends AssetListForm {
 
     public AssetListFormOwned(){
         super();
+
+        _AssetListForm.setBorder(new TitledBorder("Owned Assets"));
 
         _scrollPane.getVerticalScrollBar().addAdjustmentListener(event -> {
             if (_viewingItem || isReloading)
@@ -26,27 +30,56 @@ public class AssetListFormOwned extends AssetListForm {
                 return;
             reloadList();
         });
+
+
+
+
     }
 
+    private boolean shouldDisplay(EpicItem item){
+        boolean downloaded = item.getLastDownloadTime(SessionManager.getInstance().getUser().getCurrentProject()) != -1;
+
+        switch(ownedAssetsFilter){
+            case DOWNLOADED:
+                if(!downloaded)
+                    return false;
+                break;
+            case NOTDOWNLOADED:
+                if(downloaded)
+                    return false;
+                break;
+        }
+
+        if(filterByVendor.length() > 0 && !item.getSellerName().equals(filterByVendor))
+            return false;
+
+        if(filterByCategory.length() > 0) {
+            boolean found = false;
+            for(EpicCategory cat : item.getCategories())
+                if(cat.getName().equals(filterByCategory))
+                    found = true;
+
+            if(!found)
+                return false;
+        }
+
+        if(filterByText.length() > 0 && !item.getName().contains(filterByText) && !item.getSellerName().contains(filterByText) && !item.getDescription().contains(filterByText) && !item.getLongDescription().contains(filterByText))
+            return false;
+
+        return true;
+    }
 
     public void reloadList() {
+        HashSet<String> vendors = new HashSet<>();
+        HashSet<String> categories = new HashSet<>();
+
         ArrayList<String> tableElements = new ArrayList<>();
 
         int i = 0;
         if (SessionManager.getInstance().getUser().getOwnedItems() != null) {
             for (EpicItem item : SessionManager.getInstance().getUser().getOwnedItems()) {
-                boolean downloaded = item.getLastDownloadTime(SessionManager.getInstance().getUser().getCurrentProject()) != -1;
-
-                switch(ownedAssetsFilter){
-                    case DOWNLOADED:
-                        if(!downloaded)
-                            continue;
-                        break;
-                    case NOTDOWNLOADED:
-                        if(downloaded)
-                            continue;
-                        break;
-                }
+                if(!shouldDisplay(item))
+                    continue;
 
                 if (i >= _itemsPerPage)
                     break;
@@ -64,12 +97,15 @@ public class AssetListFormOwned extends AssetListForm {
                 tableElements.add(asset);
 
                 i++;
+
+                vendors.add(item.getSellerName());
+                for(EpicCategory cat : item.getCategories())
+                    categories.add(cat.getName());
             }
         }
 
         // build html data
-        String body = Utils.getResource("launcher/html/ownedAssetsHead.html");
-        body+="<table class=\"asset-container\">";
+        String body = "<table class=\"asset-container\">";
 
         i=0;
         for(String element : tableElements){
@@ -91,5 +127,8 @@ public class AssetListFormOwned extends AssetListForm {
             _textPane1.setCaretPosition(0);
             _scrollPane.getVerticalScrollBar().setValue(0);
         }
+
+        setVendors(vendors);
+        setCategories(categories);
     }
 }

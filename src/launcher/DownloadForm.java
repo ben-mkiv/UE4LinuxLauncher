@@ -29,7 +29,7 @@ public class DownloadForm extends JFrame {
 	private AssetListForm invokedFrom;
 
 	public DownloadForm() {
-		super("Download");
+		super("UE4LinuxLauncher - Download");
 		_item = null;
 		setContentPane(_panel1);
 		setVisible(false);
